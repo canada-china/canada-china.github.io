@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1">
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="description" content="做了一个indeed爬虫，用来分析机器学习的需求趋势，也可以用在其他找工作方面，比如求职市场的动向分析，讨论范围是加拿大或者美国的就业市场"/>
+
+
+
+
+  <meta name="keywords" content="技术,找工作," />
+
+
+
+
+
+  <link rel="alternate" href="/default" title="加拿大干货">
+
+
+
+
+
+
+<link rel="canonical" href="http://yoursite.com/2017/11/09/indeed爬虫：分析加拿大招聘动向/"/>
+
+
+<meta name="description" content="做了一个indeed爬虫，用来分析机器学习的需求趋势，也可以用在其他找工作方面，比如求职市场的动向分析，讨论范围是加拿大或者美国的就业市场">
+<meta name="keywords" content="技术,找工作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="indeed爬虫：分析加拿大招聘动向">
+<meta property="og:url" content="http://yoursite.com/2017/11/09/indeed爬虫：分析加拿大招聘动向/index.html">
+<meta property="og:site_name" content="加拿大干货">
+<meta property="og:description" content="做了一个indeed爬虫，用来分析机器学习的需求趋势，也可以用在其他找工作方面，比如求职市场的动向分析，讨论范围是加拿大或者美国的就业市场">
+<meta property="og:updated_time" content="2017-11-10T07:06:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="indeed爬虫：分析加拿大招聘动向">
+<meta name="twitter:description" content="做了一个indeed爬虫，用来分析机器学习的需求趋势，也可以用在其他找工作方面，比如求职市场的动向分析，讨论范围是加拿大或者美国的就业市场">
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=1.1" />
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+
+
+
+
+
+<script type="text/javascript">
+  var themeConfig = {
+    fancybox: {
+      enable: false
+    },
+  };
+</script>
+
+
+
+
+  
+
+  <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-108826838-1', 'auto');
+        ga('send', 'pageview');
+  </script>
+
+
+
+    <title> indeed爬虫：分析加拿大招聘动向 - 加拿大干货 </title>
+  </head>
+
+  <body>
+    <div id="page">
+      <header id="masthead"><div class="site-header-inner">
+    <h1 class="site-title">
+        <a href="/." class="logo">加拿大干货</a>
+    </h1>
+
+    <nav id="nav-top">
+        
+            <ul id="menu-top" class="nav-top-items">
+                
+                    <li class="menu-item">
+                        <a href="/archives">
+                            
+                            
+                                Archives
+                            
+                        </a>
+                    </li>
+                
+                    <li class="menu-item">
+                        <a href="/about">
+                            
+                            
+                                About
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        
+  </nav>
+</div>
+
+      </header>
+      <div id="content">
+        
+    <div id="primary">
+        
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          indeed爬虫：分析加拿大招聘动向
+        
+      </h1>
+
+      <time class="post-time">
+          Nov 09 2017
+      </time>
+    </header>
+
+
+
+    
+            <div class="post-content">
+            <p>最近研究了下爬虫，发现简单的爬虫很容易实现，就是用beautifulsoup parser网页，关键需要摸清网页的结构，url有哪些规律，如何建立一个循环生成下一个url。</p>
+<p>一个简单的应用就是indeed爬虫，indeed是北美强大的求职网站，上面的招聘信息非常全。我的这个script就是根据搜索内容分析职位信息（job title）和招聘公司。比如你想知道哪类工作最需要machine learning（机器学习），又是哪些公司有这样的职位，就可以用这个爬虫程序。</p>
+<p>input是query条件和地区：query可以很简单（比如machine learning），也可以很复杂（包括哪些关键字不包括哪些关键字），地区可以是Toronto, ON. 然后就会parse搜索结果页面，并试图获取next page的url，直到最后一页。在每一个搜索结果页面上，会得到job title list和company list，indeed在结果中掺入了sponsor的items，我把这些排除在外了。</p>
+<p>比如query是machine learning，地区是多伦多，搜索结果是500个job postings，输出结果就是这500个postings的job title和company，然后分析它们的frequency，比如data scientist在list中出现次数多少，bank company出现次数多少等。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</div><div class="line"><span class="keyword">import</span> urllib</div><div class="line"><span class="keyword">import</span> re</div><div class="line"><span class="keyword">import</span> collections</div><div class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># get lists of job title and companies from a single webpage</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_title_company</span><span class="params">(url)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        html = urllib.request.urlopen(url).read()</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        print(<span class="string">'invalid url!'</span>)</div><div class="line">        <span class="keyword">return</span></div><div class="line">    soup = BeautifulSoup(html, <span class="string">"lxml"</span>)</div><div class="line">    titles = soup.find_all(<span class="string">'a'</span>, &#123;<span class="string">'data-tn-element'</span>: <span class="string">'jobTitle'</span>&#125;)  <span class="comment"># find all job title tags</span></div><div class="line">    companies = soup.find_all(<span class="string">'span'</span>, &#123;<span class="string">'class'</span>: <span class="string">'company'</span>&#125;)  <span class="comment"># find all company tags</span></div><div class="line">    company_list, title_list = [], []  <span class="comment"># they are used to store title and company strings</span></div><div class="line"></div><div class="line">    <span class="comment">#  remove sponsor jobs</span></div><div class="line">    <span class="keyword">for</span> title <span class="keyword">in</span> titles:</div><div class="line">        <span class="keyword">if</span> title[<span class="string">'class'</span>] == [<span class="string">'turnstileLink'</span>]:</div><div class="line">            title_list.append(title.get_text())</div><div class="line">    <span class="keyword">for</span> company <span class="keyword">in</span> companies:</div><div class="line">        <span class="keyword">if</span> company.parent[<span class="string">'class'</span>] != [<span class="string">'sjcl'</span>]:</div><div class="line">            company_list.append(company.get_text(<span class="string">"|"</span>, strip=<span class="keyword">True</span>))</div><div class="line"></div><div class="line">    <span class="keyword">return</span> &#123;<span class="string">'titles'</span>: title_list, <span class="string">'companies'</span>: company_list, <span class="string">'soup'</span>: soup&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># help function to update result list</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">update_result</span><span class="params">(final, temp)</span>:</span></div><div class="line">    final[<span class="string">'titles'</span>].extend(temp[<span class="string">'titles'</span>])</div><div class="line">    final[<span class="string">'companies'</span>].extend(temp[<span class="string">'companies'</span>])</div><div class="line">    next_page = temp[<span class="string">'soup'</span>].find(<span class="string">"span"</span>, &#123;<span class="string">"class"</span>: <span class="string">"np"</span>&#125;, text=re.compile(<span class="string">"Next"</span>))</div><div class="line">    <span class="keyword">return</span> next_page</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># core function</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">indeed_scraping</span><span class="params">(query, city, province)</span>:</span></div><div class="line">    base_url = <span class="string">'https://www.indeed.ca'</span></div><div class="line">    curr_url = base_url + <span class="string">'/jobs?q='</span> + query + <span class="string">'&amp;l='</span> + city + <span class="string">'%2C+'</span> + province</div><div class="line">    result = &#123;<span class="string">'titles'</span>: [], <span class="string">'companies'</span>: []&#125;</div><div class="line">    temp_result = get_title_company(curr_url)</div><div class="line">    next_page = update_result(result, temp_result)</div><div class="line">    <span class="keyword">while</span> next_page <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</div><div class="line">        sleep(<span class="number">1</span>)</div><div class="line">        curr_url = base_url + next_page.parent.parent.get(<span class="string">'href'</span>)</div><div class="line">        temp_result = get_title_company(curr_url)</div><div class="line">        next_page = update_result(result, temp_result)</div><div class="line">    <span class="keyword">return</span> result</div><div class="line"></div><div class="line"></div><div class="line">a = indeed_scraping(<span class="string">'python'</span>, <span class="string">'Calgary'</span>, <span class="string">'AB'</span>)</div><div class="line">titles_stat = collections.Counter(a[<span class="string">'titles'</span>])</div><div class="line">companies_stat = collections.Counter(a[<span class="string">'companies'</span>])</div><div class="line">print(titles_stat)</div><div class="line">print(<span class="string">'\n'</span>)</div><div class="line">print(companies_stat)</div><div class="line">print(<span class="string">'\n'</span>)</div><div class="line"></div><div class="line"><span class="comment"># debug part</span></div><div class="line"><span class="comment"># print(len(a['titles']))</span></div><div class="line"><span class="comment"># print('\n')</span></div><div class="line"><span class="comment"># for b in a['titles']:</span></div><div class="line"><span class="comment">#     print(b)</span></div><div class="line"><span class="comment"># print('\n')</span></div><div class="line"><span class="comment"># print(len(a['companies']))</span></div><div class="line"><span class="comment"># print('\n')</span></div><div class="line"><span class="comment"># for b in a['companies']:</span></div><div class="line"><span class="comment">#     print(b)</span></div></pre></td></tr></table></figure>
+            </div>
+          
+
+    
+      <footer class="post-footer">
+		
+		<div class="post-tags">
+		  
+			<a href="/tags/技术/">技术</a>
+		  
+			<a href="/tags/找工作/">找工作</a>
+		  
+		</div>
+		
+
+        
+        
+  <nav class="post-nav">
+    
+    
+      <a class="next" href="/2017/10/28/转行的思考/">
+        <span class="next-text nav-default">转行的思考</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+        
+  <div class="comments" id="comments">
+    
+    <div style="text-align:center;">
+        <button class="btn" id="load-disqus" onclick="disqus.load();">加载 Disqus 评论</button>
+    </div>
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+      </footer>
+    
+  </article>
+
+    </div>
+
+      </div>
+
+      <footer id="colophon"><span class="copyright-year">
+    
+        &copy;
+    
+    2017
+    <span class="footer-author">peter.</span>
+    <span class="power-by">
+        Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a> and <a class="theme-link" href="https://github.com/frostfan/hexo-theme-polarbear">Polar Bear</a>
+    </span>
+</span>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+    
+
+<script type="text/javascript">
+  var disqus_shortname = 'canada-china';
+  var disqus_identifier = '2017/11/09/indeed爬虫：分析加拿大招聘动向/';
+
+  var disqus_title = "indeed爬虫：分析加拿大招聘动向";
+
+
+  var disqus = {
+    load : function disqus(){
+        if(typeof DISQUS !== 'object') {
+          (function () {
+          var s = document.createElement('script'); s.async = true;
+          s.type = 'text/javascript';
+          s.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+          }());
+          $('#load-disqus').remove(); ///加载后移除按钮
+        }
+    }
+  }
+
+  
+    var disqus_config = function () {
+        this.page.url = disqus_url;
+        this.page.identifier = disqus_identifier;
+        this.page.title = disqus_title;
+    };
+  
+
+</script>
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+
+    <script type="text/javascript" src="/js/src/theme.js?v=1.1"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=1.1"></script>
+
+  </body>
+</html>
